@@ -1,6 +1,9 @@
 import "./App.css";
 
 import React, { useEffect, useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { COPY_SUCCESS } from "./message";
 
 import {
   numbers,
@@ -11,7 +14,6 @@ import {
 
 function App() {
   // dichiarazione variabili
-
   const [password, setPassword] = useState("");
   const [length, setLength] = useState(12);
   const [includeUppercase, setIncludeUppercase] = useState(false);
@@ -21,11 +23,40 @@ function App() {
 
   // EFFECT
   useEffect(() => {
+    console.log("render");
     document.addEventListener("keydown", detectedKeyDown);
-  });
+  }, []);
+
   const detectedKeyDown = (e) => {
     if (e.key === "Enter") {
       handleGeneratePassword();
+    }
+  };
+
+  // TOASTIFY
+  const notify = (message) => {
+    if (!password) {
+      toast.error("Nothing to copy", {
+        position: "bottom-center",
+        autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: false,
+        theme: "dark",
+      });
+    } else {
+      toast.success(message, {
+        position: "bottom-center",
+        autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: false,
+        theme: "dark",
+      });
     }
   };
 
@@ -72,9 +103,23 @@ function App() {
 
     return password;
   };
-
+  // handleChange event
   const handleChange = (event) => {
     setLength(event.target.value);
+  };
+
+  const copyToClipboard = () => {
+    const newTextArea = document.createElement("textarea");
+    newTextArea.innerText = password;
+    document.body.appendChild(newTextArea);
+    newTextArea.select();
+    document.execCommand("copy");
+    newTextArea.remove();
+  };
+
+  const handleCopyPassword = (e) => {
+    copyToClipboard();
+    notify(COPY_SUCCESS);
   };
 
   // JSX PART
@@ -102,7 +147,7 @@ function App() {
         {length < 4 && (
           <p className="p-1 bg-danger text-white rounded">
             <i className="fa-solid fa-circle-left fa-sm p-2"></i>
-            Value can't be less than 4
+            Value can't be less than 6
           </p>
         )}
         {length > 20 && (
@@ -118,12 +163,12 @@ function App() {
         <div className="ms-5 ps-3 mt-3 pt-4">
           {/* div contenitore favicon */}
           <div className="w-75 d-flex justify-content-between psw-container">
-            <h6 className="m-auto">{password}</h6>
+            <h6 className="m-auto password">{password}</h6>
 
-            {/* favico */}
-            <span className="p-1">
-              <i className="far fa-clipboard ms-2 text-white btn p-1 m-auto rounded d-flex p-2"></i>
-            </span>
+            {/* fontawesome icon  // bottone copy psw */}
+            <button className="btn p-2 m-1" onClick={handleCopyPassword}>
+              <i className="far fa-clipboard  fs-6 text-white  m-auto rounded d-flex "></i>
+            </button>
           </div>
 
           {/* div pass length */}
@@ -220,6 +265,20 @@ function App() {
           >
             GENERATE PASSWORD
           </button>
+
+          <ToastContainer
+            position="bottom-center"
+            autoClose={1000}
+            limit={1}
+            hideProgressBar
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss={false}
+            draggable={false}
+            pauseOnHover={false}
+            theme="dark"
+          />
         </div>
       </div>
     </div>
