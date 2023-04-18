@@ -1,6 +1,7 @@
 import "./App.css";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
 import {
   numbers,
   upperCaseLetters,
@@ -10,12 +11,23 @@ import {
 
 function App() {
   // dichiarazione variabili
+
   const [password, setPassword] = useState("");
   const [length, setLength] = useState(12);
-  const [includeUppercase, setIncludeUppercase] = useState(true);
+  const [includeUppercase, setIncludeUppercase] = useState(false);
   const [includeLowercase, setIncludeLowercase] = useState(true);
-  const [includeNumbers, setIncludeNumbers] = useState(true);
-  const [includeSymbols, setIncludeSymbols] = useState(true);
+  const [includeNumbers, setIncludeNumbers] = useState(false);
+  const [includeSymbols, setIncludeSymbols] = useState(false);
+
+  // EFFECT
+  useEffect(() => {
+    document.addEventListener("keydown", detectedKeyDown);
+  });
+  const detectedKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleGeneratePassword();
+    }
+  };
 
   // funzione generate psw
   const handleGeneratePassword = (e) => {
@@ -29,17 +41,25 @@ function App() {
     if (includeSymbols) {
       charList = charList + specialCharacters;
     }
-    if (upperCaseLetters) {
+    if (includeUppercase) {
       charList = charList + upperCaseLetters;
     }
 
-    if (length <0) {
-      alert('U must insert a value from 4 to 12!!');
-    
+    if (length > 20) {
+      setLength(20);
+
+      charList = "";
+    }
+
+    if (length < 6) {
+      setLength(6);
+
+      charList = "";
     }
 
     setPassword(createPassword(charList));
   };
+
   // funzione che crea la psw
   const createPassword = (charList) => {
     let password = "";
@@ -49,13 +69,51 @@ function App() {
       const charIndex = Math.round(Math.random() * charListVal);
       password = password + charList.charAt(charIndex);
     }
+
     return password;
   };
+
+  const handleChange = (event) => {
+    setLength(event.target.value);
+  };
+
   // JSX PART
   return (
     <div className="App pt-5">
+      <div className="css-3d-text">PASSWORD</div>
+      <div className="css-3d-text_2">GENERATOR</div>
+
       {/* inizio app content  */}
 
+      {/* blink div */}
+      <div className="error_div blink-1">
+        {includeSymbols === false &&
+          includeLowercase === false &&
+          includeNumbers === false &&
+          includeUppercase === false && (
+            <p className="p-1 bg-danger text-white rounded">
+              <i className="fa-solid fa-circle-left fa-sm p-2"></i>
+              Select at least one option!
+            </p>
+          )}
+      </div>
+
+      <div className="error_div_2 blink-1">
+        {length < 4 && (
+          <p className="p-1 bg-danger text-white rounded">
+            <i className="fa-solid fa-circle-left fa-sm p-2"></i>
+            Value can't be less than 4
+          </p>
+        )}
+        {length > 20 && (
+          <p className="p-1 bg-danger text-white rounded">
+            <i className="fa-solid fa-circle-left fa-sm p-2"></i>
+            Value can't be higher than 20
+          </p>
+        )}
+      </div>
+
+      {/* app content div */}
       <div className="app-content  m-auto mt-5 pt-1 m-auto">
         <div className="ms-5 ps-3 mt-3 pt-4">
           {/* div contenitore favicon */}
@@ -71,13 +129,30 @@ function App() {
           {/* div pass length */}
           <div className="option w-75 d-flex mb-2 justify-content-between mt-4 pt-2">
             <label className="ps-2">Password length</label>
+
             <input
-              defaultValue={length}
+              value={length}
               type="number"
               id="length"
-              min="4"
-              max="12"
-              onChange={(e) => setLength(e.target.value)}
+              min="6"
+              max="20"
+              className="border-0 rounded text-center"
+              onChange={handleChange}
+              onKeyDown={(evt) =>
+                ["e", "E", "+", "-"].includes(evt.key) && evt.preventDefault()
+              }
+            />
+          </div>
+
+          <div>
+            <input
+              type="range"
+              id="myRange"
+              className="ms-2 slider"
+              value={length}
+              min="6"
+              max="20"
+              onChange={handleChange}
             />
           </div>
 
@@ -96,7 +171,7 @@ function App() {
           </div>
 
           {/* div uppercase */}
-          <div className="w-75 d-flex justify-content-between d-none">
+          <div className="w-75 d-flex justify-content-between">
             <label className="ps-2">
               Include <strong>uppercase</strong>
             </label>
